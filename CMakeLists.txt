@@ -298,10 +298,32 @@ ament_target_dependencies(
 )
 add_custom_command(TARGET ros2_rt_dualarm POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_if_different
-        ${CMAKE_CURRENT_SOURCE_DIR}/MR_info.json lib/${PROJECT_NAME})
-
-        install(TARGETS ros2_rt_dualarm
-        DESTINATION lib/${PROJECT_NAME})
+        ${CMAKE_CURRENT_SOURCE_DIR}/info/MR_info.json lib/${PROJECT_NAME})
+add_custom_command(TARGET ros2_rt_dualarm POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        ${CMAKE_CURRENT_SOURCE_DIR}/info/MR_info.json share/${PROJECT_NAME})
+	install(TARGETS ros2_rt_dualarm
+		DESTINATION lib/${PROJECT_NAME})
+	install(
+		DIRECTORY  ${CMAKE_CURRENT_SOURCE_DIR}/urdf/
+		DESTINATION share/${PROJECT_NAME}
+	)
+	install(
+		DIRECTORY  ${CMAKE_CURRENT_SOURCE_DIR}/meshes/visual/
+		DESTINATION share/${PROJECT_NAME}/meshes/visual/
+	)
+	install(
+		DIRECTORY  ${CMAKE_CURRENT_SOURCE_DIR}/meshes/collision/
+		DESTINATION share/${PROJECT_NAME}/meshes/collision/
+	)
+	install(
+		DIRECTORY  ${CMAKE_CURRENT_SOURCE_DIR}/launch/
+		DESTINATION share/${PROJECT_NAME}
+	)
+	install(
+		DIRECTORY  ${CMAKE_CURRENT_SOURCE_DIR}/info/
+		DESTINATION ${CMAKE_CURRENT_SOURCE_DIR}/../../
+	)
       
         if(BUILD_TESTING)
         find_package(ament_lint_auto REQUIRED)
