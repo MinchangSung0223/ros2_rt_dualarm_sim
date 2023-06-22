@@ -55,6 +55,8 @@ set(CMAKE_MODULE_PATH  ${CMAKE_CURRENT_SOURCE_DIR}/modules)
 set(BUILD_SHARED_LIBS TRUE)
 
 set(Etherlab_ROOT_DIR ${CMAKE_CURRENT_SOURCE_DIR}/lib/etherlab)
+
+set(PROJECT_NAME_SIM ${PROJECT_NAME}_sim)
 #===============================================================================
 # Build options
 #===============================================================================
@@ -148,8 +150,21 @@ add_subdirectory(include/Robot)
 add_executable(${PROJECT_NAME}
         src/RTIndy7Client.cpp
 )
+add_executable(${PROJECT_NAME_SIM}
+        src/RTIndy7Sim.cpp
+)
 
 target_link_libraries(${PROJECT_NAME}
+        # sub::CTRL
+        # sub::KDL
+        sub::ECAT
+        sub::Interpolator
+        sub::MR
+        sub::NETWORK
+        sub::Robot
+        dl
+)
+target_link_libraries(${PROJECT_NAME_SIM}
         # sub::CTRL
         # sub::KDL
         sub::ECAT
@@ -163,6 +178,7 @@ target_link_libraries(${PROJECT_NAME}
 # jsoncpp
 find_package(jsoncpp REQUIRED)
 target_link_libraries(${PROJECT_NAME} jsoncpp_lib)
+target_link_libraries(${PROJECT_NAME_SIM} jsoncpp_lib)
 list(APPEND INCLUDE_DIRS_FOR_DYNAMIC_VIEW ${jSONCPP_INCLUDE_DIRS})
 
 # xenomai
@@ -171,6 +187,7 @@ message(STATUS "Xenomai found with theses skins: ${Xenomai_SKINS}")
 if(Xenomai_FOUND)
 
     target_include_directories(${PROJECT_NAME} PUBLIC ${KERNELHEADERS_DIR})
+    target_include_directories(${PROJECT_NAME_SIM} PUBLIC ${KERNELHEADERS_DIR})
     foreach(comp_lists ${Xenomai_FOUND_COMP})
         #message(STATUS "Xenomai ${comp_lists} includes : ${Xenomai_${comp_lists}_INCLUDE_DIRS}" )
         #message(STATUS "Xenomai ${comp_lists} definitions: ${Xenomai_${comp_lists}_DEFINITIONS}")
@@ -180,32 +197,15 @@ if(Xenomai_FOUND)
         #message(STATUS "Xenomai ${comp_lists} DL_FLAGS : ${Xenomai_${comp_lists}_DL_FLAGS}")
 
         target_include_directories(${PROJECT_NAME} PUBLIC ${Xenomai_${comp_lists}_INCLUDE_DIRS})
+        target_include_directories(${PROJECT_NAME_SIM} PUBLIC ${Xenomai_${comp_lists}_INCLUDE_DIRS})
         # target_link_libraries(${PROJECT_NAME} PUBLIC ${Xenomai_${comp_lists}_LIBRARY_DIRS} ${Xenomai_${comp_lists}_LIBRARIES})
         target_link_libraries(${PROJECT_NAME} ${Xenomai_${comp_lists}_DL_FLAGS})
+        target_link_libraries(${PROJECT_NAME_SIM} ${Xenomai_${comp_lists}_DL_FLAGS})
         set_target_properties(${PROJECT_NAME} PROPERTIES COMPILE_FLAGS ${Xenomai_${comp_lists}_DEFINITIONS})
+        set_target_properties(${PROJECT_NAME_SIM} PROPERTIES COMPILE_FLAGS ${Xenomai_${comp_lists}_DEFINITIONS})
     endforeach(comp_lists ${Xenomai_SKINS})
 endif(Xenomai_FOUND)
-if(NOT Xenomai_FOUND)
-message(STATUS "Xenomai NOT FOUND")
-link_directories(
-	"${CMAKE_CURRENT_SOURCE_DIR}/lib/xenomai")
-set( LIBS
-	 "${CMAKE_CURRENT_SOURCE_DIR}/lib/xenomai/libxenomai.so"
- 	 "${CMAKE_CURRENT_SOURCE_DIR}/lib/xenomai/libnative.so"
-	 "${CMAKE_CURRENT_SOURCE_DIR}/lib/xenomai/libanalogy.so"
-	 "${CMAKE_CURRENT_SOURCE_DIR}/lib/xenomai/libpthread_rt.so"	  	 
-	 "${CMAKE_CURRENT_SOURCE_DIR}/lib/xenomai/libpsos.so"	  
- 	 "${CMAKE_CURRENT_SOURCE_DIR}/lib/xenomai/librtdm.so"	  	 	 
- 	 "${CMAKE_CURRENT_SOURCE_DIR}/lib/xenomai/libvrtx.so"	  	 	 
- 	 "${CMAKE_CURRENT_SOURCE_DIR}/lib/xenomai/libvxworks.so"	  	 	 
- 	 "${CMAKE_CURRENT_SOURCE_DIR}/lib/xenomai/libuitron.so"	  	 	  	  	  	 
-)
-target_link_libraries(${PROJECT_NAME}
-        # sub::CTRL
-        # sub::KDL
-	${LIBS}
-)
-endif(NOT Xenomai_FOUND)
+
 
 # casadi
 if(WITH_CASADI)
@@ -215,7 +215,9 @@ if(WITH_CASADI)
         MESSAGE(STATUS "CASADI_INCLUDE_DIRS = ${CASADI_INCLUDE_DIR}")
         MESSAGE(STATUS "CASADI_LIBRARIES = ${CASADI_LIBRARIES}")
         target_include_directories(${PROJECT_NAME} PUBLIC ${CASADI_INCLUDE_DIR})
+        target_include_directories(${PROJECT_NAME_SIM} PUBLIC ${CASADI_INCLUDE_DIR})
         target_link_libraries(${PROJECT_NAME} ${CASADI_LIBRARIES})
+        target_link_libraries(${PROJECT_NAME_SIM} ${CASADI_LIBRARIES})
     endif ()
 
     set( INDY7_CASADI
@@ -288,7 +290,7 @@ if(RTIndy7_VERBOSE)
     message(STATUS "")
 endif(RTIndy7_VERBOSE)
 ament_target_dependencies(
-  ros2_rt_dualarm
+    ${PROJECT_NAME}
   "robot_state_publisher"
   "sensor_msgs"  
   "std_msgs"
@@ -296,14 +298,25 @@ ament_target_dependencies(
   "nav_msgs"
   "jsoncpp"
 )
-add_custom_command(TARGET ros2_rt_dualarm POST_BUILD
+ament_target_dependencies(
+    ${PROJECT_NAME_SIM}
+  "robot_state_publisher"
+  "sensor_msgs"  
+  "std_msgs"
+  "geometry_msgs"
+  "nav_msgs"
+  "jsoncpp"
+)
+add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_if_different
         ${CMAKE_CURRENT_SOURCE_DIR}/info/MR_info.json lib/${PROJECT_NAME})
-add_custom_command(TARGET ros2_rt_dualarm POST_BUILD
+add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_if_different
         ${CMAKE_CURRENT_SOURCE_DIR}/info/MR_info.json share/${PROJECT_NAME})
-	install(TARGETS ros2_rt_dualarm
+	install(TARGETS ${PROJECT_NAME}
 		DESTINATION lib/${PROJECT_NAME})
+    install(TARGETS ${PROJECT_NAME_SIM}
+		DESTINATION lib/${PROJECT_NAME})        
 	install(
 		DIRECTORY  ${CMAKE_CURRENT_SOURCE_DIR}/urdf/
 		DESTINATION share/${PROJECT_NAME}
