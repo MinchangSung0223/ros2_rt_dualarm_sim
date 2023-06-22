@@ -9,3 +9,9 @@
     cd ~/ros2_foxy
     ros2 launch ros2_rt_dualarm dualarm.launch.py
 ```
+
+## simulation start
+```bash
+    cd ~/ros2_foxy
+    ros2 launch ros2_rt_dualarm dualarm_sim.launch.py
+```
