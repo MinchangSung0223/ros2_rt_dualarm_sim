@@ -12,12 +12,20 @@
 #include "RTIndy7Client.h"
 #include "MR_Indy7.h"
 #include "MR_DualArm.h"
-#include "rclcpp/rclcpp.hpp"
-#include "sensor_msgs/msg/joint_state.hpp"
-#include "std_msgs/msg/bool.hpp"
-#include "geometry_msgs/msg/pose_stamped.hpp"
-#include "std_msgs/msg/header.hpp"
-#include "nav_msgs/msg/path.hpp"
+#include "MR_Indy7_DualArm.h"
+#include "modern_robotics_relative.h"
+#include "modern_robotics.h"
+
+#include "SharedMemory/b3RobotSimulatorClientAPI_NoDirect.h"
+#include "SharedMemory/PhysicsClientSharedMemory_C_API.h"
+#include "SharedMemory/b3RobotSimulatorClientAPI_InternalData.h"
+#include "Bullet3Common/b3Vector3.h"
+#include "Bullet3Common/b3Quaternion.h"
+#include "Bullet3Common/b3HashMap.h"
+#include "Utils/b3Clock.h"
+#include "Indy7.h"
+#include "DualArm.h"
+
 //
 JointInfo right_info;
 JointInfo left_info;
@@ -28,47 +36,29 @@ MR_Indy7 mr_indy7;
 MR_Indy7 mr_indy7_l;
 MR_Indy7 mr_indy7_r;
 MR_DualArm mr_dualarm;
+MR_Indy7_DualArm dualarm;
+DualArm* robot;
+b3RobotSimulatorClientAPI_NoDirect sim;
+
 
 // Xenomai RT tasks
 RT_TASK RTIndy7_task;
 RT_TASK safety_task;
 RT_TASK print_task;
 int traj_flag = 0;
-class JointStatePublisherNode : public rclcpp::Node
-{
-public:
-  JointStatePublisherNode()
-      : Node("joint_state_publisher")
-  {
 
-    
-    joint_state_publisher_ = create_publisher<sensor_msgs::msg::JointState>("joint_states", 10);
-    joint_state_timer_ = create_wall_timer(std::chrono::microseconds(1000), std::bind(&JointStatePublisherNode::publish_joint_state, this));
-  }
-
-private:
-  rclcpp::TimerBase::SharedPtr joint_state_timer_;
-  rclcpp::Publisher<sensor_msgs::msg::JointState>::SharedPtr joint_state_publisher_;
-  void publish_joint_state()
-  {
-    //ROS TOPIC
-	left_info.act.q<<JVec::Random();
-    auto joint_state_msg = std::make_shared<sensor_msgs::msg::JointState>();
-    joint_state_msg->header.stamp = this->now();
-    joint_state_msg->name = {"l_joint_0", "l_joint_1", "l_joint_2", "l_joint_3", "l_joint_4", "l_joint_5", "r_joint_0", "r_joint_1", "r_joint_2", "r_joint_3", "r_joint_4", "r_joint_5"};
-    joint_state_msg->position = {left_info.act.q[0], left_info.act.q[1], left_info.act.q[2], 
-                                 left_info.act.q[3], left_info.act.q[4], left_info.act.q[5],
-                                right_info.act.q[0], right_info.act.q[1], right_info.act.q[2], 
-                                right_info.act.q[3], right_info.act.q[4], right_info.act.q[5]};
-    joint_state_publisher_->publish(*joint_state_msg);
-  }
-
-
-};
-
-
-
+//BULLET SIM
+extern const int CONTROL_RATE;
+const int CONTROL_RATE = 1000;
+const b3Scalar FIXED_TIMESTEP = 1.0 / ((b3Scalar)CONTROL_RATE);
+b3SharedMemoryCommandHandle command;
+int statusType, ret;
+int end_flag = 0;
+double t=0;
 // RTIndy7_task
+RTIME step;
+int leftId;
+
 void RTIndy7_run(void *arg)
 {
 	
@@ -77,10 +67,33 @@ void RTIndy7_run(void *arg)
 	 *            period
 	 */
 	rt_task_set_periodic(NULL, TM_NOW, cycle_ns);
-
+	RTIME now,previous;
+	t= 0;
+	double dt = 0.001;
+	now= 0 ;
+	previous= 0 ;
+	step = 0;
 	while (run)
 	{
 		rt_task_wait_period(NULL); 	//wait for next cycle
+		previous = rt_timer_read();
+		relmr::JVec q = robot->get_q(&sim);
+		now = rt_timer_read();
+
+
+		right_info.act.q[0] = q[0];
+		right_info.act.q[1] = q[1];
+		right_info.act.q[2] = q[2];
+		right_info.act.q[3] = q[3];
+		right_info.act.q[4] = q[4];
+		right_info.act.q[5] = q[5];
+		relmr::JVec G = dualarm.GravityForces(q);		
+		relmr::JVec max_torque;
+		max_torque<<1000,1000,1000,1000,1000,1000,1000,1000,1000,1000,1000,1000;
+		robot->set_torque(&sim,G,max_torque);
+		sim.stepSimulation();
+		step = now-previous;
+		t+=dt;
 	}
 }
 
@@ -94,9 +107,12 @@ void print_run(void *arg)
 	 *            period (here: 100ms = 0.1s)
 	 */
 	rt_task_set_periodic(NULL, TM_NOW, cycle_ns*100);
-	while (1)
+	while (run)
 	{
+		
 		rt_task_wait_period(NULL); //wait for next cycle
+		rt_printf("%f -- %f %f %f %f %f %f\n",t,right_info.act.q[0],right_info.act.q[1],right_info.act.q[2],right_info.act.q[3],right_info.act.q[4],right_info.act.q[5]);
+		rt_printf("%llu ns \n" , step);
 	}
 }
 
@@ -125,6 +141,8 @@ void signal_handler(int signum)
 		printf("╔════════════════[SIGNAL INPUT SIGHUP]═══════════════╗\n");
     printf("║                Servo drives Stopped!               ║\n");
 	printf("╚════════════════════════════════════════════════════╝\n");	
+	run = 0;
+	exit(1);
     
 }
 
@@ -132,7 +150,6 @@ void signal_handler(int signum)
 /****************************************************************************/
 int main(int argc, char *argv[])
 {
-    rclcpp::init(argc, argv);
 	// Perform auto-init of rt_print buffers if the task doesn't do so
 	std::cout<<"start<"<<std::endl;
     rt_print_auto_init(1);
@@ -160,7 +177,33 @@ int main(int argc, char *argv[])
 
 	mr_dualarm = MR_DualArm();
 	mr_dualarm.MRSetup();
-
+	dualarm=MR_Indy7_DualArm();
+	dualarm.MRSetup();	
+	//---------BULLET SETUP START------------------
+	b3PhysicsClientHandle client = b3ConnectSharedMemory(SHARED_MEMORY_KEY);
+	if (!b3CanSubmitCommand(client))
+	{
+		printf("Not connected, start a PyBullet server first, using python -m pybullet_utils.runServer\n");
+		exit(0);
+	}
+	b3RobotSimulatorClientAPI_InternalData data;
+	data.m_physicsClientHandle = client;
+	data.m_guiHelper = 0;
+	sim.setInternalData(&data);
+	sim.resetSimulation();
+	sim.setGravity( btVector3(0 , 0 ,-9.8));
+	int bodyId = sim.loadURDF("model/body.urdf");  
+	leftId = sim.loadURDF("model/indy7.urdf");  
+	int rightId = sim.loadURDF("model/indy7.urdf");  
+	btVector3 left_pos(0,0.1563,0.3772);
+	btQuaternion left_orn(-0.5,0,0,0.866);
+	btVector3 right_pos(0,-0.1563,0.3772);
+	btQuaternion right_orn(0.0,0.5,-0.866,0);    
+	sim.resetBasePositionAndOrientation(leftId,left_pos, left_orn);
+	sim.resetBasePositionAndOrientation(rightId,right_pos, right_orn);	
+    robot= new DualArm(&sim,rightId,leftId);
+	//---------BULLET SETUP END-----------------
+	
 	
 	// RTIndy7_task: create and start
 	printf("Now running rt task ...\n");
@@ -175,16 +218,8 @@ int main(int argc, char *argv[])
 	
 
 	// Must pause here
-	//pause();
+	pause();
 
-  	auto node = std::make_shared<JointStatePublisherNode>();
-	rclcpp::WallRate loop_rate(1000);
-	while (rclcpp::ok())
-	{
-	    rclcpp::spin_some(node);
-	    loop_rate.sleep();
-	}
-	rclcpp::shutdown();  
 	// Finalize
 	signal_handler(0);
 

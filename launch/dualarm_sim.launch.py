@@ -30,11 +30,11 @@ def generate_launch_description():
             output='screen',
             parameters=[{'use_sim_time': use_sim_time, 'robot_description': robot_desc}],
             arguments=[urdf]),
-        Node(
-            package='ros2_rt_dualarm',
-            executable='ros2_rt_dualarm_sim',
-            name='ros2_rt_dualarm_sim',
-            output='screen'),
+        #Node(
+        #    package='ros2_rt_dualarm',
+        #    executable='ros2_rt_dualarm_ros2_sim',
+        #    name='ros2_rt_dualarm_ros2_sim',
+        #    output='screen'),
         Node(
             package='rviz2',
             executable='rviz2',

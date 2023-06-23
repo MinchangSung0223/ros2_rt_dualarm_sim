@@ -182,18 +182,7 @@ SE3 MR_Indy7::T_b(JVec q)
 {
     return mr::FKinBody(this->M, this->Blist, q);
 }
-JVec MR_Indy7::ForwardDynamics(const JVec q,const JVec qdot,const JVec tau,Vector6d Ftip){
-   return mr::ForwardDynamics(q,qdot,tau,this->g,Ftip,this->Mlist,this->Glist,this->Slist);
-}
-MassMat MR_Indy7::MassMatrix(const JVec q){    
-    MassMat M =mr::MassMatrix(q,this->Mlist, this->Glist, this->Slist) ;
 
-    return M; 
-}
-
-JVec MR_Indy7::VelQuadraticForces( const JVec q,const JVec dq){
-         return mr::VelQuadraticForces(q,dq,this->Mlist, this->Glist, this->Slist) ; 
-}
 JVec MR_Indy7::ComputedTorqueControl( JVec q,JVec dq,JVec q_des,JVec dq_des){
     JVec e = q_des-q;
     JVec edot = dq_des-dq;

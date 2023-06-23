@@ -41,6 +41,7 @@ public:
     mr::Matrix6d Hinf_K_gamma;
 
     void MRSetup();
+    mr::JVec Gravity( JVec q);
 
     mr::Matrix6xn Mmat(JVec q);
     mr::JVec Cvec(JVec q, JVec dq);
@@ -51,15 +52,10 @@ public:
     mr::SE3 T_s(JVec q);
     mr::SE3 T_b(JVec q);
 
-    mr::JVec Gravity( JVec q);
     mr::JVec ComputedTorqueControl( JVec q,JVec dq,JVec q_des,JVec dq_des);
     void saturationMaxTorque(JVec &torque, JVec MAX_TORQUES);
     mr::JVec ComputedTorquePIDControl( JVec q,JVec dq,JVec q_des,JVec dq_des,JVec& eint);
     mr::JVec HinfControl( JVec q,JVec dq,JVec q_des,JVec dq_des,JVec ddq_des,JVec& eint);
-    JVec VelQuadraticForces(const  JVec q,JVec dq);
-    MassMat MassMatrix(const  JVec q);
-    JVec ForwardDynamics(const JVec q,const JVec qdot,const JVec tau,const Vector6d Ftip);
-    
 };
 
 #endif // MR_INDY7_H

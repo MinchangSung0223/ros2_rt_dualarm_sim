@@ -1,6 +1,6 @@
 #include "MR_DualArm.h"
 
-bool ReadFromFile_(const char* filename, char* buffer, int len){
+bool ReadFromFile__(const char* filename, char* buffer, int len){
   FILE* r = fopen(filename,"rb");
   if (NULL == r)
        return false;
@@ -9,11 +9,11 @@ bool ReadFromFile_(const char* filename, char* buffer, int len){
   return true;
 
 }
-bool ReadMRData_(const char* filename,Json::Value &rootr){
+bool ReadMRData__(const char* filename,Json::Value &rootr){
 	cout<<"START ReadMRData"<<endl;
 	const int BufferLength = 102400;
 	char readBuffer[BufferLength] = {0,};
-	if (false == ReadFromFile_(filename, readBuffer, BufferLength)) {
+	if (false == ReadFromFile__(filename, readBuffer, BufferLength)) {
 		std::cout<<"Failed"<<std::endl;
 		return -1;
 	}
@@ -36,7 +36,7 @@ MR_DualArm::MR_DualArm(){
 }
 void MR_DualArm::MRSetup(){
 	Json::Value rootr;
-	bool ret = ReadMRData_("MR_info.json",rootr);
+	bool ret = ReadMRData__("MR_info.json",rootr);
 	for(int i =0;i<6 ; i++){
 		for(int j =0;j<12;j++){
 			this->Slist(i,j) = rootr["relSlist"][i][j].asDouble();
