@@ -173,9 +173,9 @@ void MR_Trajectory::saveJointTrajectory(const std::string& filename) {
  void MR_Trajectory::addScurveRelativeJointTrajectory(const relmr::JVec& q0,const relmr::JVec& q1,const relmr::JVec& qdot0,const relmr::JVec& qdot1,const relmr::JVec& qddot0,const relmr::JVec& qddot1,double t0,double t1,double dt,int trajType){
     	vector<Trajectory> traj_list;
 	    Trajectory traj;        
-        traj.j = 10;
-        traj.amax = 1;
-        traj.dmax = 1;
+        traj.j = 20;
+        traj.amax = 2;
+        traj.dmax = 2;
         traj.vmax = 10;
         traj.ao = 0;
         traj.vo = 0;
@@ -184,11 +184,20 @@ void MR_Trajectory::saveJointTrajectory(const std::string& filename) {
         traj.so = 0;
         traj.sf = 1;
         traj_list.push_back(traj);
+        traj.j = 20;
+        traj.amax = 1.1;
+        traj.dmax = 1.1;
+        traj.vmax = 11;
+        traj_list.push_back(traj);
         ScurveGenerator sg = ScurveGenerator(traj_list);
         Trajectory ret_traj;
 	    traj = sg.getTraj(0);
-        sg.U2DminTimeTraj(&traj,ret_traj);
-        sg.printTrajectory(&ret_traj);
+        sg.update_(0,U2D);
+        sg.update_(1,U2D);
+        sg.updateTargetTime_(0,U2D,2);
+        sg.updateTargetTime_(1,U2D,2);
+       // sg.syncTime();
+        sg.printAllTrajectory();
  }
 // Vector3d ScurveTimeScalingKinematics(double s0, double s1 ,double sdot0,double sdot1,double sddot0,double sddot1,double dt,double Tf,double t){
 //     Vector3d ret_sdsdds;
