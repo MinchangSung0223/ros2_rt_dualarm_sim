@@ -33,8 +33,40 @@ bool ReadMRData_(const char* filename,Json::Value &rootr){
 
     return 1;
 }
-// q = q_r, -q_l_flip
-
+// q = -q_r_flip, q_l
+relmr::JVec MR_Indy7_DualArm::get_q_rel(relmr::JVec q){
+    relmr::JVec q_rel = relmr::JVec::Zero();
+    q_rel(0) = -q(11);
+    q_rel(1) = -q(10);
+    q_rel(2) = -q(9);
+    q_rel(3) = -q(8);
+    q_rel(4) = -q(7);
+    q_rel(5) = -q(6);
+    q_rel(6)  = q(0);
+    q_rel(7)  = q(1);
+    q_rel(8)  = q(2);
+    q_rel(9)  = q(3);
+    q_rel(10) = q(4);
+    q_rel(11) = q(5);
+    return q_rel;
+}
+// q = -q_r_flip, q_l
+relmr::JVec MR_Indy7_DualArm::get_qdot_rel(relmr::JVec q){
+    relmr::JVec q_rel = relmr::JVec::Zero();
+    q_rel(0) = -q(11);
+    q_rel(1) = -q(10);
+    q_rel(2) = -q(9);
+    q_rel(3) = -q(8);
+    q_rel(4) = -q(7);
+    q_rel(5) = -q(6);
+    q_rel(6)  = q(0);
+    q_rel(7)  = q(1);
+    q_rel(8)  = q(2);
+    q_rel(9)  = q(3);
+    q_rel(10) = q(4);
+    q_rel(11) = q(5);
+    return q_rel;
+}
  MR_Indy7_DualArm::MR_Indy7_DualArm(){
     this->jointnum = 12;
     this->L = new MR_Indy7();
@@ -46,6 +78,91 @@ bool ReadMRData_(const char* filename,Json::Value &rootr){
     this->q = relJVec::Zero();
     this->L->g << 0 ,8.487,-4.9;
     this->R->g << 0 ,8.487,-4.9;
+    this->HinfSim_Kp = relmr::Matrixnxn::Identity();
+    this->HinfSim_Kv = relmr::Matrixnxn::Identity();
+    this->HinfSim_Ki = relmr::Matrixnxn::Identity();
+    this->HinfSim_K_gamma = relmr::Matrixnxn::Identity();
+
+    for (int i=0; i<12; ++i)
+    {
+        switch(i)
+        {
+
+        case 0:
+            HinfSim_Kp(i,i) = 100.0;
+            HinfSim_Kv(i,i) = 20.0;
+            HinfSim_K_gamma(i,i) = 50+1.0/800.0 ;
+            break;
+
+        case 1:
+            HinfSim_Kp(i,i) = 100.0;
+            HinfSim_Kv(i,i) = 20.0;
+            HinfSim_K_gamma(i,i) = 30+1.0/600.0 ;
+
+            break;
+
+        case 2:
+            HinfSim_Kp(i,i) = 100.0;
+            HinfSim_Kv(i,i) = 20.0;
+            HinfSim_K_gamma(i,i) = 30.0+1.0/500.0 ;
+
+            break;
+
+        case 3:
+            HinfSim_Kp(i,i) = 100.0;
+            HinfSim_Kv(i,i) = 20.0;
+            HinfSim_K_gamma(i,i) = 3.0+1.0/500.0 ;
+
+            break;
+
+        case 4:
+			HinfSim_Kp(i,i) = 100.0;
+            HinfSim_Kv(i,i) = 20.0;
+            HinfSim_K_gamma(i,i) = 3.0+1.0/500.0 ;
+
+            break;
+
+        case 5:
+            HinfSim_Kp(i,i) = 100.0;
+            HinfSim_Kv(i,i) = 20.0;
+            HinfSim_K_gamma(i,i) = 0.1+1.0/600.0 ;
+            break;
+		case 6:
+			HinfSim_Kp(i,i) = 100.0;
+            HinfSim_Kv(i,i) = 20.0;
+            HinfSim_K_gamma(i,i) = 50+1.0/800.0 ;
+            break;	
+		case 7:
+			HinfSim_Kp(i,i) = 100.0;
+            HinfSim_Kv(i,i) = 20.0;
+            HinfSim_K_gamma(i,i) = 30+1.0/600.0 ;
+
+            break;					
+		case 8:
+			HinfSim_Kp(i,i) = 100.0;
+            HinfSim_Kv(i,i) = 20.0;
+            HinfSim_K_gamma(i,i) = 30.0+1.0/500.0 ;
+
+            break;	
+		case 9:
+			HinfSim_Kp(i,i) = 100.0;
+            HinfSim_Kv(i,i) = 20.0;
+            HinfSim_K_gamma(i,i) = 3.0+1.0/500.0 ;
+
+            break;					
+		case 10:
+			HinfSim_Kp(i,i) = 100.0;
+            HinfSim_Kv(i,i) = 20.0;
+            HinfSim_K_gamma(i,i) = 3.0+1.0/500.0 ;
+
+            break;	
+		case 11:
+			HinfSim_Kp(i,i) = 100.0;
+            HinfSim_Kv(i,i) = 20.0;
+            HinfSim_K_gamma(i,i) = 0.1+1.0/600.0 ;
+            break;					
+        }
+    }	
  };
 relmr::JVec MR_Indy7_DualArm::ForwardDynamics(const relmr::JVec q,const relmr::JVec qdot,const relmr::JVec tau,const Vector6d Ftip_r,const Vector6d Ftip_l){
 	relmr::JVec qddot;
@@ -68,9 +185,32 @@ relmr::MassMat MR_Indy7_DualArm::MassMatrix(const relmr::JVec q){
 	q_r = q.segment<6>(0);
 	q_l = q.segment<6>(6);	
 	M.topLeftCorner<JOINTNUM, JOINTNUM>() = this->R->MassMatrix(q_r);
-
 	M.bottomRightCorner<JOINTNUM, JOINTNUM>() = this->L->MassMatrix(q_l);
 	return M;
+ }
+ relmr::JVec MR_Indy7_DualArm::HinfControlSim(const relmr::JVec q,const relmr::JVec qdot,const relmr::JVec q_des,const relmr::JVec qdot_des,const relmr::JVec qddot_des,relmr::JVec& eint){
+    relmr::JVec e = q_des-q;
+    relmr::JVec edot = qdot_des-qdot;	
+	relmr::MassMat Mmat = this->MassMatrix(q);
+	relmr::JVec C = this->VelQuadraticForces(q,qdot);
+	relmr::JVec G = this->GravityForces(q);
+    relmr::JVec qddot_ref = qddot_des+HinfSim_Kv*edot+HinfSim_Kp*e;
+	relmr::JVec qdot_ref = qdot_des+HinfSim_Kv*e+HinfSim_Kp*eint;
+	relmr::JVec Cref = this->VelQuadraticForces(q,qdot_ref);
+
+    relmr::JVec torq = Mmat*qddot_ref+Cref+G+(HinfSim_K_gamma)*(edot + HinfSim_Kv*e + HinfSim_Kp*eint);	
+	//relmr::JVec torq = Mmat*ddq_ref+C+G;	
+	//relmr::JVec torq = C+G;	
+	return torq;
+ }
+void MR_Indy7_DualArm::FKinBody(const relmr::JVec q){
+	mr::JVec q_l,q_r;
+	q_r = q.segment<6>(0);
+	q_l = q.segment<6>(6);
+	this->T0r = this->R->T_b(q_r);
+	this->T0l = this->L->T_b(q_l);
+	this->Tbr = this->Tbr0*this->T0r;
+	this->Tbl = this->Tbl0*this->T0l;
  }
 relmr::JVec MR_Indy7_DualArm::GravityForces(const relmr::JVec q){
 	relmr::JVec grav;
@@ -118,13 +258,20 @@ void MR_Indy7_DualArm::MRSetup(){
 
 	for (int i = 0;i<4;i++){
 		for (int j = 0;j<4;j++){
-			this->Tbl(i,j) = rootr["Tbl"][i][j].asDouble();
+			this->Tbr0(i,j) = rootr["Tbl"][i][j].asDouble();
 		}
 	}    
+	for (int i = 0;i<4;i++){
+		for (int j = 0;j<4;j++){
+			this->Tbl0(i,j) = rootr["Tbr"][i][j].asDouble();
+		}
+	}    	
     cout<<"=================relM================="<<endl;
     cout<<this->M<<endl;    
-    cout<<"=================Tbl================="<<endl;
-    cout<<this->Tbl<<endl;    
+    cout<<"=================Tbl0================="<<endl;
+    cout<<this->Tbl0<<endl;   
+    cout<<"=================Tbr0================="<<endl;
+    cout<<this->Tbr0<<endl;    	 
 	cout<<"END MRSetup"<<endl;
 
 }

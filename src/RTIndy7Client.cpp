@@ -843,8 +843,10 @@ void RTIndy7_run(void *arg)
 			
 			//right_info.des.tau = tauVec_r;
 			//left_info.des.tau = tauVec_l;
-			right_info.des.tau = mr_indy7_r.HinfControl( right_info.act.q , right_info.act.q_dot, right_info.des.q, right_info.des.q_dot,right_info.des.q_ddot,eint_r);
+			//right_info.des.tau = mr_indy7_r.HinfControl( right_info.act.q , right_info.act.q_dot, right_info.des.q, right_info.des.q_dot,right_info.des.q_ddot,eint_r);
 			left_info.des.tau = mr_indy7_l.HinfControl( left_info.act.q , left_info.act.q_dot, left_info.des.q, left_info.des.q_dot,left_info.des.q_ddot,eint_l);
+			right_info.des.tau =tauVec_r;
+			//left_info.des.tau =tauVec_r;			
 			// //mr_indy7.saturationMaxTorque(info.des.tau,MAX_TORQUES);
 		
 		}
