@@ -107,12 +107,12 @@
 
 // SN: DUAL ARM
 
-#define ZERO_POS_1 60787
-#define ZERO_POS_2 17522
-#define ZERO_POS_3 74922
-#define ZERO_POS_4 161092
-#define ZERO_POS_5 58936
-#define ZERO_POS_6 14358
+#define ZERO_POS_1 53744
+#define ZERO_POS_2 11697
+#define ZERO_POS_3 72308
+#define ZERO_POS_4 167172
+#define ZERO_POS_5 56088
+#define ZERO_POS_6 9866
 #define ZERO_POS_7 448713
 #define ZERO_POS_8 -25024
 #define ZERO_POS_9 138717

@@ -46,6 +46,7 @@ MR_Indy7 mr_indy7_r;
 MR_DualArm mr_dualarm;
 MR_Indy7_DualArm dualarm;
 MR_Trajectory traj;
+MR_Trajectory task_traj;
 DualArm* robot;
 b3RobotSimulatorClientAPI_NoDirect sim;
 
@@ -118,7 +119,82 @@ private:
 
 
 };
+void drawTaskTrajectory(class b3RobotSimulatorClientAPI_NoDirect* sim,const vector<SE3> Xd_list,double dt, double Tf){
+		for(int i = 0;i<floor(Tf/dt);){
+		SE3 Xd =Xd_list.at(i);
+		Vector4d p0,px,py,pz;
+		vector<Vector4d> p_list;
+		p0<<0,0,0,1;
+		px<<0.1,0,0,1;
+		py<<0,0.1,0,1;
+		pz<<0,0,0.1,1;
+		p0 = Xd*p0;
+		px = Xd*px;
+		py = Xd*py;
+		pz = Xd*pz;
+		p_list.push_back(px);
+		p_list.push_back(py);
+		p_list.push_back(pz);
 
+		double dfromXYZ[3];
+		double dtoXYZ[3];
+		for(int j = 0;j<p_list.size();j++){
+			Vector4d p = p_list.at(j);
+			dfromXYZ[0] = p0(0);
+			dfromXYZ[1] = p0(1);
+			dfromXYZ[2] = p0(2);
+
+			dtoXYZ[0] = p(0);
+			dtoXYZ[1] = p(1);
+			dtoXYZ[2] = p(2);
+			b3RobotSimulatorAddUserDebugLineArgs args;
+			args.m_colorRGB[0] = 0;
+			args.m_colorRGB[1] = 0;
+			args.m_colorRGB[2] = 0;
+			args.m_colorRGB[j] = 1;
+			args.m_lineWidth = 2;
+			sim->addUserDebugLine(dfromXYZ, dtoXYZ, args);
+			usleep(100000/5.0);
+		}
+		i+=100;
+		}
+		SE3 Xd = Xd_list.at(task_traj.Xd_list.size()-1);
+		Vector4d p0,px,py,pz;
+		vector<Vector4d> p_list;
+		p0<<0,0,0,1;
+		px<<0.1,0,0,1;
+		py<<0,0.1,0,1;
+		pz<<0,0,0.1,1;
+		p0 = Xd*p0;
+		px = Xd*px;
+		py = Xd*py;
+		pz = Xd*pz;
+		p_list.push_back(px);
+		p_list.push_back(py);
+		p_list.push_back(pz);
+
+		double dfromXYZ[3];
+		double dtoXYZ[3];
+		for(int j = 0;j<p_list.size();j++){
+			Vector4d p = p_list.at(j);
+			dfromXYZ[0] = p0(0);
+			dfromXYZ[1] = p0(1);
+			dfromXYZ[2] = p0(2);
+
+			dtoXYZ[0] = p(0);
+			dtoXYZ[1] = p(1);
+			dtoXYZ[2] = p(2);
+			b3RobotSimulatorAddUserDebugLineArgs args;
+			args.m_colorRGB[0] = 0;
+			args.m_colorRGB[1] = 0;
+			args.m_colorRGB[2] = 0;
+			args.m_colorRGB[j] = 1;
+			args.m_lineWidth = 2;
+			sim->addUserDebugLine(dfromXYZ, dtoXYZ, args);
+			usleep(100000/5.0);
+		}
+	
+}
 void RTIndy7_run(void *arg)
 {
 	/* Arguments: &task (NULL=self),
@@ -143,17 +219,31 @@ void RTIndy7_run(void *arg)
 	max_torque<<1000,1000,1000,1000,1000,1000,1000,1000,1000,1000,1000,1000;
 	relmr::JVec q_next=relmr::JVec::Random();
 	relmr::JVec q_next2=relmr::JVec::Random();
+	relmr::JVec q_next3=relmr::JVec::Random();
+	relmr::JVec q_next4=relmr::JVec::Random();
 	relmr::JVec qdot_1 =relmr::JVec::Random();
 	relmr::JVec qdot_2 =relmr::JVec::Random();
+	relmr::JVec qdot_max;
+	relmr::JVec qddot_max;
+	qdot_max<<2,2,2,2,2,2,2,2,2,2,2,2;
+	qddot_max<<5,5,5,5,5,5,5,5,5,5,5,5;
+
 	int trajType = 0; 
 	traj.addRelativeJointTrajectory(q_init,q_next,relmr::JVec::Zero(),relmr::JVec::Zero(),relmr::JVec::Zero(),relmr::JVec::Zero(),0,2,dt,trajType);
-	traj.addScurveRelativeJointTrajectory(q_next,q_init,relmr::JVec::Zero(),relmr::JVec::Zero(),relmr::JVec::Zero(),relmr::JVec::Zero(),2,4,dt,trajType);
-	// traj.addScurveRelativeJointTrajectory(q_init,q_next2,relmr::JVec::Zero(),relmr::JVec::Zero(),relmr::JVec::Zero(),relmr::JVec::Zero(),4,6,dt,trajType);
-	// traj.addScurveRelativeJointTrajectory(q_next2,q_init,relmr::JVec::Zero(),relmr::JVec::Zero(),relmr::JVec::Zero(),relmr::JVec::Zero(),6,8,dt,trajType);
-	// traj.addRelativeJointTrajectory(q_next,q_init,qdot_1,relmr::JVec::Zero(),relmr::JVec::Zero(),relmr::JVec::Zero(),2,4,dt,trajType);
-	// traj.addRelativeJointTrajectory(q_init,q_next2,relmr::JVec::Zero(),qdot_2,relmr::JVec::Zero(),relmr::JVec::Zero(),4,6,dt,trajType);
-	// traj.addRelativeJointTrajectory(q_next2,q_init,qdot_2,relmr::JVec::Zero(),relmr::JVec::Zero(),relmr::JVec::Zero(),6,8,dt,trajType);
-	Tf = 8;
+	traj.addScurveRelativeJointTrajectory(q_next,q_next2,relmr::JVec::Zero(),relmr::JVec::Zero(),relmr::JVec::Zero(),relmr::JVec::Zero(),qdot_max,qddot_max,2,4,dt,trajType);
+	traj.addScurveRelativeJointTrajectory(q_next2,q_next3,relmr::JVec::Zero(),relmr::JVec::Zero(),relmr::JVec::Zero(),relmr::JVec::Zero(),qdot_max,qddot_max,4,6,dt,trajType);
+	traj.addScurveRelativeJointTrajectory(q_next3,q_init,relmr::JVec::Zero(),relmr::JVec::Zero(),relmr::JVec::Zero(),relmr::JVec::Zero(),qdot_max,qddot_max,6,10,dt,trajType);
+	dualarm.FKinBody(q_init);
+	mr::SE3 X0 = dualarm.Tbr0*dualarm.T0r;
+	mr::SO3 R01 = MatrixExp3(VecToso3(Vector3d(0.5,0.5,0.5)));
+	mr::SE3 X1 = dualarm.Tbr0*dualarm.T0r*RpToTrans(R01,Vector3d(0.1,0.1,0.1));
+	Vector6d V0 = Vector6d::Zero();
+	Vector6d V1 = Vector6d::Random()*0.1;
+	Vector6d Vd0 = Vector6d::Zero();
+	Vector6d Vd1 = Vector6d::Zero();
+	task_traj.addLieScrewTrajectory(X0,X1,V0,V1,Vd0,Vd1,0,2,dt,0);
+	drawTaskTrajectory(&sim,task_traj.Xd_list,dt,2);
+	Tf = 10;
 	while (t<Tf)
 	{
 		rt_task_wait_period(NULL); 	//wait for next cycle
@@ -287,6 +377,7 @@ int main(int argc, char *argv[])
 	dualarm=MR_Indy7_DualArm();
 	dualarm.MRSetup();	
 	traj = MR_Trajectory();
+	task_traj = MR_Trajectory();
 	//---------BULLET SETUP START------------------
 	b3PhysicsClientHandle client = b3ConnectSharedMemory(SHARED_MEMORY_KEY);
 	if (!b3CanSubmitCommand(client))
