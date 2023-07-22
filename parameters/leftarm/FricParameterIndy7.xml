@@ -1,0 +1,9 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<FricParameter>
+  <fricPar F_c_n="-10.061" F_c_p="10.184" F_v1_n="-70.314" F_v1_p="74.638" F_v2_n="-0.41363" F_v2_p="-0.47417" temperature="36.821" index="0" sigma_0="1.6804e4" sigma_1="259.2605"/>
+  <fricPar F_c_n="-8.3239" F_c_p="8.324" F_v1_n="-55.341" F_v1_p="55.341" F_v2_n="0.39086" F_v2_p="0.39086" temperature="40.199" index="1" sigma_0="1.6804e4" sigma_1="259.2605"/>
+  <fricPar F_c_n="-4.3925" F_c_p="4.3925" F_v1_n="-21.865" F_v1_p="21.865" F_v2_n="0.61329" F_v2_p="0.6133" temperature="45.787" index="2" sigma_0="1.6804e3" sigma_1="81.9854"/>
+  <fricPar F_c_n="-2.358" F_c_p="2.3993" F_v1_n="-10.085" F_v1_p="10.196" F_v2_n="-0.74007" F_v2_p="-0.78353" temperature="49.855" index="3" sigma_0="1.6804e3" sigma_1="81.9854"/>
+  <fricPar F_c_n="-2.2989" F_c_p="2.3286" F_v1_n="-9.4613" F_v1_p="9.8648" F_v2_n="0.79397" F_v2_p="0.86276" temperature="50.042" index="4" sigma_0="1.6804e3" sigma_1="81.9854"/>
+  <fricPar F_c_n="-2.1959" F_c_p="2.1387" F_v1_n="-8.4724" F_v1_p="8.4115" F_v2_n="-0.68712" F_v2_p="-0.6613" temperature="53.719" index="5" sigma_0="1.6804e3" sigma_1="81.9854"/>
+</FricParameter>

@@ -230,7 +230,14 @@ void RTIndy7_run(void *arg)
 
 	int trajType = 0; 
 	traj.addRelativeJointTrajectory(q_init,q_next,relmr::JVec::Zero(),relmr::JVec::Zero(),relmr::JVec::Zero(),relmr::JVec::Zero(),0,2,dt,trajType);
+	previous = rt_timer_read();
 	traj.addScurveRelativeJointTrajectory(q_next,q_next2,relmr::JVec::Zero(),relmr::JVec::Zero(),relmr::JVec::Zero(),relmr::JVec::Zero(),qdot_max,qddot_max,2,4,dt,trajType);
+	now = rt_timer_read();
+	rt_printf("TRAJECTORY TIME == %llu ns\n",now-previous);
+	rt_printf("TRAJECTORY TIME == %llu ns\n",now-previous);
+	rt_printf("TRAJECTORY TIME == %llu ns\n",now-previous);
+	rt_printf("TRAJECTORY TIME == %llu ns\n",now-previous);
+	rt_printf("TRAJECTORY TIME == %llu ns\n",now-previous);	
 	traj.addScurveRelativeJointTrajectory(q_next2,q_next3,relmr::JVec::Zero(),relmr::JVec::Zero(),relmr::JVec::Zero(),relmr::JVec::Zero(),qdot_max,qddot_max,4,6,dt,trajType);
 	traj.addScurveRelativeJointTrajectory(q_next3,q_init,relmr::JVec::Zero(),relmr::JVec::Zero(),relmr::JVec::Zero(),relmr::JVec::Zero(),qdot_max,qddot_max,6,10,dt,trajType);
 	dualarm.FKinBody(q_init);
@@ -242,6 +249,9 @@ void RTIndy7_run(void *arg)
 	Vector6d Vd0 = Vector6d::Zero();
 	Vector6d Vd1 = Vector6d::Zero();
 	task_traj.addLieScrewTrajectory(X0,X1,V0,V1,Vd0,Vd1,0,2,dt,0);
+
+
+
 	drawTaskTrajectory(&sim,task_traj.Xd_list,dt,2);
 	Tf = 10;
 	while (t<Tf)

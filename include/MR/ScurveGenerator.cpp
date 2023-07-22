@@ -2461,6 +2461,7 @@ void ScurveGenerator::updateTargetTime(Trajectory* traj, double T) {
             int new_type =  findMinTrajType(traj);
             traj->type = new_type;
             this->generate(traj);   
+            cout<<traj->tt<<endl;
             if(abs(traj->tt -T)<1e-15)break;
         }
         else if (traj->type == UU1){

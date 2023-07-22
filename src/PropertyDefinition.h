@@ -119,6 +119,76 @@
 #define ZERO_POS_10 -713436
 #define ZERO_POS_11 -1058082
 #define ZERO_POS_12 -88988
+// RIGHTARM
+// <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+// <MDHoffset>
+// 	<offset index="Link1" alpha="0.027" a="0.9083" d="300.3872" theta="0.0196"/>
+// 	<offset index="Link2" alpha="90.0671" a="0.0165" d="-0.4393" theta="89.9967"/>
+// 	<offset index="Link3" alpha="0.048" a="448.1241" d="3.0607" theta="89.9783"/>
+// 	<offset index="Link4" alpha="89.931" a="-0.0472" d="349.5632" theta="179.9989"/>
+// 	<offset index="Link5" alpha="90.0741" a="0.2018" d="182.7953" theta="0.1645"/>
+// 	<offset index="Link6" alpha="-89.9951" a="0.319" d="227.0154" theta="-0.0724"/>
+// 	<offset index="Link7" alpha="0" a="0" d="0" theta="0"/>
+// </MDHoffset>
+
+
+#define alpha_1 0.027 
+#define alpha_2 90.0671
+#define alpha_3 0.048
+#define alpha_4 89.931
+#define alpha_5 90.0741
+#define alpha_6 -89.9951
+
+#define alpha_7 0.027 
+#define alpha_8 90.0671
+#define alpha_9 0.048
+#define alpha_10 89.931
+#define alpha_11 90.0741
+#define alpha_12 -89.9951
+
+#define a_1 0.9083
+#define a_2 0.0165
+#define a_3 448.1241
+#define a_4 -0.0472
+#define a_5 0.2018
+#define a_6 0.319
+
+#define a_7 0.9083
+#define a_8 0.0165
+#define a_9 448.1241
+#define a_10 -0.0472
+#define a_11 0.2018
+#define a_12 0.319
+
+#define d_1 300.3872
+#define d_2 -0.4393
+#define d_3 3.0607
+#define d_4 349.5632
+#define d_5 182.7953
+#define d_6 227.0154
+
+#define d_7 300.3872
+#define d_8 -0.4393
+#define d_9 3.0607
+#define d_10 349.5632
+#define d_11 182.7953
+#define d_12 227.0154
+
+#define theta_1 0.0196
+#define theta_2 89.9967
+#define theta_3 89.9783
+#define theta_4 179.9989
+#define theta_5 0.1645
+#define theta_6 -0.0724
+
+#define theta_7 0.0196
+#define theta_8 89.9967
+#define theta_9 89.9783
+#define theta_10 179.9989
+#define theta_11 0.1645
+#define theta_12 -0.0724
+
+
 
 
 #define MAX_CURRENT_1 2.55

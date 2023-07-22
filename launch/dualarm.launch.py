@@ -35,11 +35,11 @@ def generate_launch_description():
             executable='ros2_rt_dualarm',
             name='ros2_rt_dualarm',
             output='screen'),
-        Node(
-            package='rviz2',
-            executable='rviz2',
-            name='rviz2',
-            output='screen',
-            parameters=[{'use_sim_time': use_sim_time, 'robot_description': robot_desc}],
-            arguments=['-d', rviz_config_file])            
+        # Node(
+        #     package='rviz2',
+        #     executable='rviz2',
+        #     name='rviz2',
+        #     output='screen',
+        #     parameters=[{'use_sim_time': use_sim_time, 'robot_description': robot_desc}],
+        #     arguments=['-d', rviz_config_file])            
     ])

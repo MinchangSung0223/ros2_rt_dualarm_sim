@@ -27,6 +27,12 @@
 #include <sstream>
 #include <Eigen/Dense>
 
+#include <canlib.h>
+#include <canstat.h>
+#include <stdio.h>
+#include <signal.h>
+#include <errno.h>
+#include <unistd.h>
 //-xenomai-///////////////////////////////////////////////////////////////
 #include <native/task.h>
 #include <native/timer.h>
