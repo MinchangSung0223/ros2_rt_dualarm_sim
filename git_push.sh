@@ -4,6 +4,6 @@ now_date=$(date +"%Y%m%d_%H%M%S")
 
 git add *
 git commit -m "$now"
-git remote add "$now_date" git@github.com:MinchangSung0223/ros2_rt_dualarm.git
+git remote add "$now_date" git@github.com:MinchangSung0223/ros2_rt_dualarm_sim.git
 git push "$now_date" main
 
